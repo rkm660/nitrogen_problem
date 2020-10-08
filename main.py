@@ -39,7 +39,7 @@ def point_in_angle_range(point_pair_angle_radians, target_point_x, target_point_
 
 
 def is_point_eligible(point_x, point_y, target_point_x, target_point_y, distance_error, angle_delta):
-    # TODO
+    # TODO: Write this function to check whether BOTH point to target AND target to point are within your image boundaries
     return False
 
 
@@ -48,6 +48,7 @@ def compute_probability_of_slice(all_raw_image_data, image_to_distance_angle_map
     points_in_range = []
     all_eligible_points = []
 
+    # X component, Y component, vector magnitude, respectively
     target_point_x = ring_radius * math.cos(ring_radius)
     target_point_y = ring_radius * math.sin(ring_radius)
     target_magnitude = math.sqrt(target_point_x**2 + target_point_y**2)
@@ -72,7 +73,6 @@ def compute_probability_of_slice(all_raw_image_data, image_to_distance_angle_map
             id_val, point_x, point_y = point_tuple
             if is_point_eligible(point_x, point_y, target_point_x, target_point_y, distance_error, angle_delta):
                 all_eligible_points.append((image, id_val))
-    print(len(all_eligible_points))
 
     try:
         probability = float(len(points_in_range)) / len(all_eligible_points)
@@ -82,15 +82,22 @@ def compute_probability_of_slice(all_raw_image_data, image_to_distance_angle_map
 
     
 def construct_image_to_distance_angle_mapping(all_raw_image_data):
+    
     all_image_to_distance_angle_mapping = {}
+    
     for image_id in all_raw_image_data:
+        
         current_distance_angle_data = {}
         current_raw_image_data = all_raw_image_data[image_id]
+
+        # Iterate over every combination of points        
         for point_a in current_raw_image_data:
             for point_b in current_raw_image_data:
+                
                 a_id, a_x, a_y = str(point_a[0]), point_a[1], point_a[2]
                 b_id, b_x, b_y = str(point_b[0]), point_b[1], point_b[2]
 
+                # Skip computing distance/angle diff from point to itself
                 if a_id != b_id:
       
                     distance_between_points = math.sqrt((b_x - a_x)**2 + (b_y - a_y)**2)
@@ -106,7 +113,7 @@ def construct_image_to_distance_angle_mapping(all_raw_image_data):
     return all_image_to_distance_angle_mapping
                        
 
-def construct_probability_matrix(distance_precision, distance_error, angle_error):
+def construct_probability_matrix(distance_error, angle_error):
 
     # Read in all .csv files in current directory (see sample file)
     all_raw_image_data = read_sample_images()
@@ -116,12 +123,13 @@ def construct_probability_matrix(distance_precision, distance_error, angle_error
         all_raw_image_data
     )
 
-    # Create result map from 
+    # Create result map from <ring_radius>-<angle (in degrees)> -> probability of point in slice
     slice_to_probability_map = {}
-    
+
+    # TODO: Update ring_radius
     for ring_radius in range(1, 3, 1):
         for angle_delta in range(0, 360, angle_error):
-            normalized_radius = float(ring_radius)/100
+            normalized_radius = float(ring_radius)/100 # TODO: update 100 to match your desired precision
             current_slice_probability = compute_probability_of_slice(
                 all_raw_image_data,
                 image_to_distance_angle_mapping,
@@ -133,8 +141,9 @@ def construct_probability_matrix(distance_precision, distance_error, angle_error
 
     return slice_to_probability_map
 
-    
-result_probability_matrix = construct_probability_matrix(2, 1, 24)
+
+# TODO: Update arguments 
+result_probability_matrix = construct_probability_matrix(1, 24)
  
 
 
